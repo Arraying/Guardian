@@ -22,18 +22,27 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * Represents the proxy behind the interface instance, which will determine what gets returned on method calls.
+ */
 public class GuardianProxy implements InvocationHandler {
 
     private final GuardianContext context;
     private final Object object;
 
-    public GuardianProxy(GuardianContext context, Object object) {
+    /**
+     * Creates the proxy.
+     * @param context The context, not null.
+     * @param object The object, not null.
+     */
+    GuardianProxy(GuardianContext context, Object object) {
         this.context = context;
         this.object = object;
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws GuardianWrapException {
+        // Get the name from the annotation.
         String targetName = getTargetMethod(method);
         if (targetName == null) {
             throw new GuardianWrapException(String.format("No wrap target specified: %s->%s#???",
@@ -53,6 +62,7 @@ public class GuardianProxy implements InvocationHandler {
                 args == null ? 0 : args.length
             ));
         }
+        // Make sure the criteria is met.
         if (!meetsCriteria(target)) {
             throw new GuardianWrapException(String.format("Could not bind %s->%s#%s: method %s does not fulfil: \n" +
                     "- Method must not return a primitive data type, except void\n" +
@@ -63,6 +73,7 @@ public class GuardianProxy implements InvocationHandler {
                 targetName
             ));
         }
+        // Invoke.
         Object result;
         try {
             result = target.invoke(this.object);
@@ -79,14 +90,18 @@ public class GuardianProxy implements InvocationHandler {
                 targetName
             ), exception);
         }
+        // If it's null, we don't need to continue any wrapping.
         if (result == null) {
             return null;
         }
         Object resultClass = result.getClass();
+        // If the result is the same type as the return type, then we can directly return.
         if (resultClass.equals(method.getReturnType())) {
             return result;
         }
+        // Otherwise, see what the result's class is, and possibly if we can wrap it.
         Class<? extends Wrappable> newIface = context.getAssociations().get(resultClass);
+        // Here, it's not defined, so no mapping exists, so we cannot return.
         if (newIface == null) {
             throw new GuardianWrapException(String.format("Could not return from %s->%s#%s: target method returned %s " +
                 "which differs from wrapped method %s, and %s has no associations in the context",
@@ -97,6 +112,7 @@ public class GuardianProxy implements InvocationHandler {
                 method.getReturnType(),
                 resultClass));
         }
+        // Here, there exists a mapping but it's still not the method return type.
         if (!newIface.equals(method.getReturnType())) {
             throw new GuardianWrapException(String.format("Could not return from %s->%s#%s: target method returned %s " +
                 "which differs from wrapped method %s, and %s is associated with %s",
@@ -109,6 +125,7 @@ public class GuardianProxy implements InvocationHandler {
                 newIface
             ));
         }
+        // Here, there is a mapping, and we recursively encapsulate the return object.
         return new GuardianWrap(context, result).get();
     }
 

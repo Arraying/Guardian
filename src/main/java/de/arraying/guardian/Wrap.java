@@ -23,8 +23,18 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * A wrap indicates to the engine that any sub-interface is a wrapper that wraps around the object it encapsulates.
+ * This makes it possible to create the encapsulation association in {@link GuardianContext#associate(Class, Class)}.
+ */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Wrap {
+
+    /**
+     * The name of the method in the object that the wrapper is encapsulating.
+     * The method restrictions need to be upheld (see specification).
+     * @return A non-null, non-empty method name that points to a valid method.
+     */
     String value();
 }

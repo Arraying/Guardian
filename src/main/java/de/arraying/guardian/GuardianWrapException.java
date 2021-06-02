@@ -18,12 +18,24 @@
 
 package de.arraying.guardian;
 
+/**
+ * This exception gets thrown when the wrapping or invocation causes an exception.
+ */
 public class GuardianWrapException extends RuntimeException {
 
+    /**
+     * Creates an exception from a message.
+     * @param message The message.
+     */
     public GuardianWrapException(String message) {
         super(message);
     }
 
+    /**
+     * Creates an exception from a message and an underlying cause.
+     * @param message The message.
+     * @param cause The cause, such as an exception during method invocation.
+     */
     public GuardianWrapException(String message, Throwable cause) {
         super(message, cause);
     }

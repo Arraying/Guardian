@@ -18,5 +18,8 @@
 
 package de.arraying.guardian;
 
+/**
+ * Denotes that any subclasses or subinterfaces may be encapsulated by Guardian.
+ */
 public interface Wrappable {
 }

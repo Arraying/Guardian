@@ -21,12 +21,22 @@ package de.arraying.guardian;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The context where all the encapsulation associations are defined.
+ */
 public class GuardianContext {
 
     private final Map<Class<?>, Class<? extends Wrappable>> associations = new HashMap<>();
 
+    /**
+     * Associates an object with its wrapper.
+     * If an association is already present for the object, it will be replaced.
+     * @param clazz The object to encapsulate.
+     * @param wrappable The wrapper.
+     * @throws IllegalArgumentException If either the object or wrapper are null.
+     */
     public synchronized void associate(Class<?> clazz, Class<? extends Wrappable> wrappable)
-            throws IllegalArgumentException{
+            throws IllegalArgumentException {
         if (clazz == null) {
             throw new IllegalArgumentException("Target class is null");
         }
@@ -42,6 +52,12 @@ public class GuardianContext {
         this.associations.put(clazz, wrappable);
     }
 
+    /**
+     * Removes an association of an encapsulating object.
+     * If no association exist, this will drop silently.
+     * @param clazz The object that is encapsulated.
+     * @throws IllegalArgumentException If the object is null.
+     */
     public synchronized void dissociate(Class<?> clazz)
             throws IllegalArgumentException {
         if (clazz == null) {
@@ -50,6 +66,11 @@ public class GuardianContext {
         this.associations.remove(clazz);
     }
 
+    /**
+     * Encapsulates an object.
+     * @param object An instance of an object.
+     * @return Null if null, or a wrapped version.
+     */
     public Object wrap(Object object) {
         if (object == null) {
             return null;

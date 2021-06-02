@@ -20,16 +20,32 @@ package de.arraying.guardian;
 
 import java.lang.reflect.Proxy;
 
+/**
+ * Represents a compound of the context and an object that needs to be encapsulated.
+ */
 public class GuardianWrap {
 
     private final GuardianContext context;
     private final Object object;
 
+    /**
+     * Creates a wrapper for the context and object.
+     * @param context The context, may not be null.
+     * @param object The object.
+     */
     public GuardianWrap(GuardianContext context, Object object) {
+        assert context != null : "Context may not be null";
+        assert object != null : "Object may not be null";
         this.context = context;
         this.object = object;
     }
 
+    /**
+     * Gets the wrapped object.
+     * This will call the proxy engine with the correct parameters.
+     * If applicable, the proxy engine will recursively call itself.
+     * @return A non-null instance of the {@link Wrappable}.
+     */
     public Object get() {
         Class<? extends Wrappable> iface = context.getAssociations().get(object.getClass());
         if (iface == null) {
